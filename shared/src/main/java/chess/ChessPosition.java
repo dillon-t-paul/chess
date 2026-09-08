@@ -9,8 +9,9 @@ package chess;
 public class ChessPosition {
 
     public ChessPosition(int row, int col) {
+        this.row = row;
+        this.column = column;
     }
-
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
