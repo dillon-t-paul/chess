@@ -10,14 +10,15 @@ public class ChessPosition {
 
     public ChessPosition(int row, int col) {
         this.row = row;
-        this.column = column;
+        this.column = col;
     }
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
      */
     public int getRow() {
-        throw new RuntimeException("Not implemented");
+        return null;
+//        throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -25,6 +26,7 @@ public class ChessPosition {
      * 1 codes for the left column
      */
     public int getColumn() {
-        throw new RuntimeException("Not implemented");
+//        throw new RuntimeException("Not implemented");
+        return null;
     }
 }
