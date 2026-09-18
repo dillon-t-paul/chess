@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -8,7 +11,7 @@ package chess;
  */
 public class ChessBoard {
 
-    private ChessPiece[][] myChessBoard = new ChessPiece[8][8];
+    private final ChessPiece[][] myChessBoard = new ChessPiece[8][8];
 
     public ChessBoard() {
 
@@ -41,6 +44,19 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+        throw new RuntimeException("Not implemented");
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoard that=(ChessBoard) o;
+        return Objects.deepEquals(myChessBoard, that.myChessBoard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(myChessBoard);
     }
 }

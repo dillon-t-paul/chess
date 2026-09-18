@@ -46,8 +46,8 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-//        throw new RuntimeException("Not implemented");
-        return null;
+        throw new RuntimeException("Not implemented");
+//        return null;
     }
 
     /**
@@ -57,7 +57,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-//        throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented");
 //        return null;
     }
 

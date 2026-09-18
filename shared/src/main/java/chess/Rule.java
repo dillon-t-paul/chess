@@ -4,20 +4,20 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class Rule {
-    private final boolean b;
+    private final boolean canMove;
     private final ChessPosition myPosition;
-    private final int[][] ints;
+    private final int[][] movements;
 
-    public Rule(boolean b, ChessPosition myPosition, int[][] ints) {
-        this.b = b;
+    public Rule(boolean canMove, ChessPosition myPosition, int[][] movements) {
+        this.canMove = canMove;
         this.myPosition = myPosition;
-        this.ints = ints;
+        this.movements = movements;
     }
 
     public Collection<ChessMove> hashedMoves(ChessBoard board, ChessPosition startPos) {
-        Collection<ChessMove> move = new HashSet<ChessMove>();
+        Collection<ChessMove> movements = new HashSet<ChessMove>();
 
-        return move;
+        return movements;
     }
 
 }
