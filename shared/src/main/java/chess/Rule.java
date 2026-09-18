@@ -1,10 +1,7 @@
 package chess;
 
-public class ChessPiece {
-    public collection<ChessMove> pieceMoves(Board, Position) {
-        return rules.pieceRule(this.type).moves(board, position);
-    }
-}
+import java.util.Collection;
+import java.util.HashSet;
 
 public class Rule {
     private final boolean b;
@@ -15,6 +12,12 @@ public class Rule {
         this.b = b;
         this.myPosition = myPosition;
         this.ints = ints;
+    }
+
+    public Collection<ChessMove> hashedMoves(ChessBoard board, ChessPosition startPos) {
+        Collection<ChessMove> move = new HashSet<ChessMove>();
+
+        return move;
     }
 
 }
