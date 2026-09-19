@@ -27,17 +27,26 @@ public class Rule {
         return false;
     }
 
-    private void movesHelper(Collection<ChessMove> validMovements, ChessBoard board, ChessPosition startPosition, int[]direction) {
-        ChessPosition endPosition = new ChessPosition(startPosition.getRow() + direction[0], startPosition.getColumn() + direction[1]);
-        boolean valid = validBoardPosition(endPosition);
-        if (!valid) {
+    private void movesHelper(Collection<ChessMove> validMovements, ChessBoard board, ChessPosition currentPosition, int[] posChange) {
+        ChessPosition endPosition = new ChessPosition(currentPosition.getRow() + posChange[0], currentPosition.getColumn() + posChange[1]);
+        if (!validBoardPosition(endPosition)) {
+            return;
+        }
+
+        ChessPiece movingPiece = board.getPiece(myPosition);
+        ChessPiece occupyingPiece = board.getPiece(endPosition);
+
+        if (occupyingPiece != null) {
+            if (occupyingPiece.getTeamColor() != movingPiece.getTeamColor()) {
+                validMovements.add(new ChessMove(myPosition, endPosition, null));
+            }
             return;
         }
 
         validMovements.add(new ChessMove(myPosition, endPosition, null));
 
         if (canMove) {
-            movesHelper(validMovements, board, endPosition, direction);
+            movesHelper(validMovements, board, endPosition, posChange);
         }
     }
 
