@@ -63,7 +63,7 @@ public class ChessPiece {
             case PAWN -> new Rule(false, myPosition, new int[][]{{1, 0}});
             default -> null;
         };
-        return rule.hashedMoves(board, myPosition);
+        return rule.hashedMoves(board);
 
     }
 
