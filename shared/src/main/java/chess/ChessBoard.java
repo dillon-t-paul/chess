@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    private final ChessPiece[][] myChessBoard = new ChessPiece[8][8];
+    private ChessPiece[][] myChessBoard = new ChessPiece[8][8];
 
     public ChessBoard() {
 
@@ -44,8 +44,31 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        myChessBoard = new ChessPiece[8][8];
 
+        for (int i=0; i<=1; i++) {
+            ChessGame.TeamColor color; int currentRow;
+            if (i==0) { color = ChessGame.TeamColor.WHITE; currentRow = 1;}
+            else { color = ChessGame.TeamColor.BLACK; currentRow = 8;}
+            addPiece(new ChessPosition(currentRow,1), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+            addPiece(new ChessPosition(currentRow,2), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+            addPiece(new ChessPosition(currentRow,3), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+            addPiece(new ChessPosition(currentRow,4), new ChessPiece(color, ChessPiece.PieceType.QUEEN));
+            addPiece(new ChessPosition(currentRow,5), new ChessPiece(color, ChessPiece.PieceType.KING));
+            addPiece(new ChessPosition(currentRow,6), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+            addPiece(new ChessPosition(currentRow,7), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+            addPiece(new ChessPosition(currentRow,8), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+        }
+
+        for (int i=1; i<=8; i++) {
+            addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        }
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.deepToString(myChessBoard);
     }
 
     @Override
