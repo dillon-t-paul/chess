@@ -8,12 +8,9 @@ package chess;
  */
 public class ChessBoard {
 
-    private final ChessPosition position;
-    private final ChessPiece piece;
-    private ChessBoard board = int[][] ChessBoard[8][8];
-
-    public ChessBoard() {
     }
+    private ChessPiece[][] board = new ChessPiece[8][8];
+
 
     /**
      * Adds a chess piece to the chessboard
@@ -24,7 +21,7 @@ public class ChessBoard {
 
 
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board =
+        board = [position[0]-1, position[1]-1]
 
     }
 
