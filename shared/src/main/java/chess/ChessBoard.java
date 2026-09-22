@@ -8,8 +8,11 @@ package chess;
  */
 public class ChessBoard {
 
+    private final ChessPosition position;
+    private final ChessPiece piece;
+    private ChessBoard board = int[][] ChessBoard[8][8];
+
     public ChessBoard() {
-        
     }
 
     /**
@@ -18,8 +21,11 @@ public class ChessBoard {
      * @param position where to add the piece to
      * @param piece    the piece to add
      */
+
+
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        board =
+
     }
 
     /**
@@ -30,7 +36,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return piece;
     }
 
     /**
@@ -38,6 +44,23 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for (int i=0; i<=1; i++) {
+            ChessGame.TeamColor color; int currentRow;
+            if (i == 0) { color = ChessGame.TeamColor.WHITE; currentRow = 1;
+            } else { color = ChessGame.TeamColor.BLACK; currentRow = 8; }
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.KING));
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.QUEEN));
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.BISHOP));
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.KNIGHT));
+            addPiece(new ChessPosition(currentRow, 1), new ChessPiece(color, ChessPiece.PieceType.ROOK));
+        }
+        for (int j=1; j<=8; j++) {
+            addPiece(new ChessPosition(2, j), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, j), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+
+        }
     }
 }
