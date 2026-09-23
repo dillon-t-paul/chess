@@ -4,12 +4,12 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class Rule {
-    private final boolean canMove;
+    private final boolean boardMobility;
     private final ChessPosition myPosition;
     private final int[][] movements;
 
-    public Rule(boolean canMove, ChessPosition myPosition, int[][] movements) {
-        this.canMove = canMove;
+    public Rule(boolean boardMobility, ChessPosition myPosition, int[][] movements) {
+        this.boardMobility = boardMobility;
         this.myPosition = myPosition;
         this.movements = movements;
     }
@@ -44,7 +44,7 @@ public class Rule {
 
         validMovements.add(new ChessMove(myPosition, endPosition, null));
 
-        if (canMove) {
+        if (boardMobility) {
             movesHelper(validMovements, board, endPosition, posChange);
         }
     }
@@ -78,15 +78,14 @@ public class Rule {
 
         int nextRow = myPosition.getRow() + rowChange;
         int column = myPosition.getColumn();
+        ChessPosition forward = new ChessPosition(nextRow, column);
 
-        if (validBoardPosition(new ChessPosition(nextRow, column))) {
-            ChessPosition forward = new ChessPosition(nextRow, column);
+        if (validBoardPosition(forward)) {
             if (board.getPiece(forward) == null) { //essentially, space is opem
                 addPawnMove(validMoves, myPosition, forward);
 
                 if (myPosition.getRow() == startingRow) {
-                    int twoRows = myPosition.getRow() + (2 * rowChange);
-                    ChessPosition doubleForward = new ChessPosition(twoRows, column);
+                    ChessPosition doubleForward = new ChessPosition((2 * rowChange), column);
                     if (validBoardPosition(doubleForward) == true && board.getPiece(doubleForward) == null) {
                         validMoves.add(new ChessMove(myPosition, doubleForward, null));
                     }
