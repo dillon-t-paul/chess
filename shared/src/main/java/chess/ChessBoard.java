@@ -27,6 +27,9 @@ public class ChessBoard {
         myChessBoard[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
+    public void rmPiece(ChessPosition position) {
+        myChessBoard[position.getRow()-1][position.getColumn()-1] = null;
+    }
     /**
      * Gets a chess piece on the chessboard
      *
