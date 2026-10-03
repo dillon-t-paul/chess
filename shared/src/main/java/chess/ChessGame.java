@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -65,18 +64,33 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        ChessPiece myPiece = board.getPiece(move.getStartPosition());
-        ChessPiece target = board.getPiece(move.getEndPosition());
-        if (target != null) {
-            board.rmPiece(move.getEndPosition());
-        }
-        board.rmPiece(move.getStartPosition());
-        board.addPiece(move.getEndPosition(), myPiece);
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition targetPosition = move.getEndPosition();
 
-        if (myPiece.getTeamColor() == TeamColor.WHITE) {
-            playerTurn = TeamColor.BLACK;
+        if (startPosition == null) {
+            throw new InvalidMoveException();
         }
-        playerTurn = TeamColor.WHITE;
+        if (!validMoves(startPosition).contains(move)) {
+            throw new InvalidMoveException();
+        }
+
+        ChessPiece myPiece = board.getPiece(startPosition);
+        TeamColor myColor = myPiece.getTeamColor();
+        ChessPiece targetPiece = board.getPiece(targetPosition);
+
+        if (myColor != playerTurn) {
+            throw new InvalidMoveException();
+        }
+
+        if (targetPiece != null) {
+            board.rmPiece(targetPosition);
+        }
+        board.rmPiece(startPosition);
+        board.addPiece(targetPosition, myPiece);
+
+        if (myColor == TeamColor.WHITE) {
+            playerTurn = TeamColor.BLACK;
+        } else { playerTurn = TeamColor.WHITE; }
     }
 
     /**
@@ -126,6 +140,14 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "board=" + board +
+                ", playerTurn=" + playerTurn +
+                '}';
     }
 
     @Override
