@@ -15,9 +15,9 @@ public class ChessGame {
 
     public ChessGame() {
         // Create board for new game, initialize it with reset
-        board = new ChessBoard();
-        board.resetBoard();
-        playerTurn = TeamColor.WHITE; // Set starting playetr to white
+        this.board = new ChessBoard();
+        this.board.resetBoard();
+        this.playerTurn = TeamColor.WHITE; // Set starting playetr to white
     }
 
     /**
@@ -33,7 +33,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        playerTurn = team;
+        this.playerTurn = team;
     }
 
     /**
@@ -53,8 +53,10 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece currentPiece = getBoard().getPiece(startPosition);
-        Collection<ChessMove> possibleMoves =  currentPiece.pieceMoves(board, startPosition);
-        return possibleMoves;
+        if (currentPiece == null || board == null) {
+            return null;
+        }
+        return currentPiece.pieceMoves(board, startPosition);
     }
 
     /**
@@ -66,19 +68,19 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition targetPosition = move.getEndPosition();
-
-        if (startPosition == null) {
+        if (startPosition == null || board == null) {
             throw new InvalidMoveException();
         }
-        if (!validMoves(startPosition).contains(move)) {
+
+        Collection<ChessMove> allowedMoves = validMoves(startPosition);
+        if (allowedMoves == null || !allowedMoves.contains(move)) {
             throw new InvalidMoveException();
         }
 
         ChessPiece myPiece = board.getPiece(startPosition);
         TeamColor myColor = myPiece.getTeamColor();
         ChessPiece targetPiece = board.getPiece(targetPosition);
-
-        if (myColor != playerTurn) {
+        if (myColor != getTeamTurn()) {
             throw new InvalidMoveException();
         }
 
@@ -88,9 +90,8 @@ public class ChessGame {
         board.rmPiece(startPosition);
         board.addPiece(targetPosition, myPiece);
 
-        if (myColor == TeamColor.WHITE) {
-            playerTurn = TeamColor.BLACK;
-        } else { playerTurn = TeamColor.WHITE; }
+        if (myColor == TeamColor.WHITE) { setTeamTurn(TeamColor.BLACK);
+        } else { setTeamTurn(TeamColor.WHITE); }
     }
 
     /**

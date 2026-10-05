@@ -85,7 +85,7 @@ public class Rule {
                 addPawnMove(validMoves, myPosition, forward);
 
                 if (myPosition.getRow() == startingRow) {
-                    ChessPosition doubleForward = new ChessPosition((2 * rowChange), column);
+                    ChessPosition doubleForward = new ChessPosition((myPosition.getRow() + (2 * rowChange)), column);
                     if (validBoardPosition(doubleForward) == true && board.getPiece(doubleForward) == null) {
                         validMoves.add(new ChessMove(myPosition, doubleForward, null));
                     }
