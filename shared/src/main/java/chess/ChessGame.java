@@ -181,8 +181,10 @@ public class ChessGame {
             for (int col=1; col<=8; col++) {
                 ChessPosition currentPosition = new ChessPosition(row, col);
                 Collection<ChessMove> validMovements = validMoves(currentPosition);
-                if (!validMovements.isEmpty()) {
-                    return false;
+                if (board.getPiece(currentPosition)!=null && board.getPiece(currentPosition).getTeamColor()==teamColor) {
+                    if (!validMovements.isEmpty()) {
+                        return false;
+                    }
                 }
             }
         }
