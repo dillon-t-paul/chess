@@ -1,3 +1,5 @@
+package game;
+
 import chess.ChessGame;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
