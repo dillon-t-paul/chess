@@ -73,7 +73,7 @@ public class Server {
         String reqJson = context.body();
         var data = GSON.fromJson(reqJson, GameData.class);
 
-        int gameID = serviceActions.createGame(header, data);
+        int gameID = serviceActions.createGame(header, data.gameName());
         var returnData = String.format("{\"gameID\": %d }", gameID);
         context.result(returnData);
     }
@@ -83,7 +83,7 @@ public class Server {
         String reqJson = context.body();
         var data = GSON.fromJson(reqJson, JoinData.class);
 
-        serviceActions.joinGame(header, data);
+        serviceActions.joinGame(header, data.playerColor(), data.gameID());
         context.result("{}");
     }
 
