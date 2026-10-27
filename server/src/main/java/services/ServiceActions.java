@@ -1,31 +1,40 @@
 package services;
 
 import chess.ChessGame;
+import datamodels.AuthData;
+import datamodels.GameData;
+import datamodels.UserData;
 
+import java.util.List;
 import java.util.UUID;
 
 public class ServiceActions {
 
-    public void registerUser(String username, String password, String email) throws Exception {
-
+    public AuthData registerUser(String username, String password, String email) throws Exception {
+        UserData newUser = new UserData(username, password, email);
+        String authToken = createAuth();
+        AuthData userAuth = new AuthData(username, authToken);
+        return userAuth;
     }
 
-    public String loginUser(String username, String password) throws Exception {
-        String authToken = createAuth(username);
-        return authToken;
+    public AuthData loginUser(String username, String password) throws Exception {
+        String authToken = createAuth();
+        AuthData userAuth = new AuthData(username, authToken);
+        return userAuth;
     }
 
     public void logoutUser(String authToken) throws Exception {
 
     }
 
-    public list<GameData> listGame(String authToken) throws Exception {
-        list<GameData> games = new list<GameData>;
+    public List<GameData> listGame(String authToken) throws Exception {
+        List<GameData> games = new List<GameData>;
         return games;
     }
 
     public Integer createGame(String authToken, String gameName) throws Exception {
         Integer gameID = 10;
+        GameData newGame = new GameData(gameID, null, null, gameName, new ChessGame());
         return gameID;
     }
 
@@ -37,12 +46,7 @@ public class ServiceActions {
 //        Three calls: Clear UserData, Clear GameData, Clear AuthData
     }
 
-    private String createAuth(String username) {
-        String authToken = generateToken();
-        return authToken;
-    }
-
-    public static String generateToken() {
+    private String createAuth() {
         return UUID.randomUUID().toString();
     }
 }
