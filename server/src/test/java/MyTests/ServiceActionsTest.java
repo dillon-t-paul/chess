@@ -99,7 +99,7 @@ class ServiceActionsTest {
         assertEquals(1, games.size());
         assertEquals(gameID, games.get(0).gameID());
         assertEquals("Opening Practice", games.get(0).gameName());
-        assertNull(games.get(0).whiteUser());
+        assertNull(games.get(0).whiteUsername());
         assertNull(games.get(0).blackUsername());
         assertNotNull(games.get(0).game());
     }
@@ -133,7 +133,7 @@ class ServiceActionsTest {
                 bob.authToken(), ChessGame.TeamColor.BLACK, gameID);
 
         GameData game = serviceActions.listGame(billy.authToken()).get(0);
-        assertEquals("Billy", game.whiteUser());
+        assertEquals("Billy", game.whiteUsername());
         assertEquals("Bob", game.blackUsername());
     }
 
