@@ -1,4 +1,4 @@
-package MyTests;
+package service;
 
 
 import com.google.gson.Gson;

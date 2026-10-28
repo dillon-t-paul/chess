@@ -1,4 +1,4 @@
-package MyTests;
+package service;
 
 import chess.ChessGame;
 import datamodels.AuthData;
