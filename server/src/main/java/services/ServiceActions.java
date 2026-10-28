@@ -15,14 +15,23 @@ public class ServiceActions {
     private final AtomicInteger nextGameID = new AtomicInteger(1);
 
     public AuthData registerUser(String username, String password, String email) throws Exception {
+        if (emptyOrNull(username) || emptyOrNull(password) || emptyOrNull(email)) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+        if (users.containsKey(username)) {
+            throw new ServiceException(403, "username already taken");
+        }
         users.put(username, new UserData(username, password, email));
         return createAuth(username);
     }
 
     public AuthData loginUser(String username, String password) throws Exception {
+        if (emptyOrNull(username) || emptyOrNull(password)) {
+            throw new ServiceException(400, "Error: bad request");
+        }
         UserData user = users.get(username);
-        if (user == null) {
-            throw new Exception();
+        if (user == null || !user.password().equals(password)) {
+            throw new ServiceException(403, "Errorl: unauthorized");
         }
         return createAuth(username);
     }
@@ -39,6 +48,9 @@ public class ServiceActions {
 
     public Integer createGame(String authToken, String gameName) throws Exception {
         checkAuth(authToken);
+        if (emptyOrNull(gameName)) {
+            throw new ServiceException(400, "Error: bad request");
+        }
         int gameID = nextGameID.getAndIncrement();
         games.put(gameID, new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
@@ -46,12 +58,24 @@ public class ServiceActions {
 
     public void joinGame(String authToken, ChessGame.TeamColor teamColor, Integer gameID) throws Exception {
         checkAuth(authToken);
+        if (teamColor==null || gameID==null) {
+            throw new ServiceException(400, "Error: bad request");
+        }
         String username = authTokens.get(authToken);
         GameData game = games.get(gameID);
+        if (game==null) {
+            throw new ServiceException(400, "Error: ad Request");
+        }
 
         if (teamColor == ChessGame.TeamColor.BLACK) {
+            if (game.blackUser() != null) {
+                throw new ServiceException(403, "Error: Team already taken");
+            }
             games.put(game.gameID(), new GameData(game.gameID(), game.whiteUser(), username, game.gameName(), game.game()));
         } else {
+            if (game.whiteUser() != null) {
+                throw new ServiceException(403, "Error: Team already taken");
+            }
             games.put(game.gameID(), new GameData(game.gameID(), username, game.blackUser(), game.gameName(), game.game()));
         }
     }
@@ -72,12 +96,20 @@ public class ServiceActions {
     }
 
     private void checkAuth(String authToken) throws Exception{
-        String username = authTokens.get(authToken);
-        if (username == null) {
-            throw new Exception();
+        if (emptyOrNull(authToken)) {
+            throw new ServiceException(400, "Error: bad request");
+        }
+        if (!authTokens.containsValue(authToken)) {
+            throw new ServiceException(403, "Error: unauthorized");
         }
     }
 
+    private boolean emptyOrNull (String value) {
+        if (value.isEmpty() || value.isBlank() || value == null) {
+            return true;
+        }
+        return false;
+    }
 
 
     public static class ServiceException extends RuntimeException {

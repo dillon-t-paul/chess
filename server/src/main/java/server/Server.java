@@ -49,7 +49,7 @@ public class Server {
             if (user == null) {
                 throw new ServiceException(400, "Error: bad request");
             }
-            var authData = serviceActions.registerUser(user.username(), user.password(), request.email());
+            var authData = serviceActions.registerUser(user.username(), user.password(), user.email());
             sendJson(context, 200, GSON.toJson(authData));
         } catch (ServiceException exception) {
             sendError(context, exception.status(), exception.getMessage());
@@ -105,10 +105,10 @@ public class Server {
     }
 
     private void createGame(Context context) {
-        var authToken = context.header("authorization");
-        String reqJson = context.body();
-        var data = GSON.fromJson(reqJson, GameData.class);
         try {
+            var authToken = context.header("authorization");
+            String reqJson = context.body();
+            var data = GSON.fromJson(reqJson, GameData.class);
             int gameID = serviceActions.createGame(authToken, data.gameName());
             var gameData = String.format("{\"gameID\": %d }", gameID);
             sendJson(context, 200, gameData);
@@ -123,10 +123,10 @@ public class Server {
     }
 
     private void joinGame(Context context) {
-        var authToken = context.header("authorization");
-        String reqJson = context.body();
-        var data = GSON.fromJson(reqJson, JoinData.class);
         try {
+            var authToken = context.header("authorization");
+            String reqJson = context.body();
+            var data = GSON.fromJson(reqJson, JoinData.class);
             serviceActions.joinGame(authToken, data.playerColor(), data.gameID());
             sendJson(context, 200, "{}");
 
