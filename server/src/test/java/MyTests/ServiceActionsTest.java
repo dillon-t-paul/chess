@@ -23,9 +23,9 @@ class ServiceActionsTest {
 
     @Test
     void registerCreatesUserAndAuthToken() throws Exception {
-        AuthData auth = register("alice");
+        AuthData auth = register("Billy");
 
-        assertEquals("alice", auth.username());
+        assertEquals("Billy", auth.username());
         assertNotNull(auth.authToken());
         assertFalse(auth.authToken().isBlank());
     }
@@ -33,40 +33,40 @@ class ServiceActionsTest {
     @Test
     void registerRejectsMissingOrBlankFields() {
         assertStatus(400, () ->
-                serviceActions.registerUser(null, "password", "a@example.com"));
+                serviceActions.registerUser(null, "password", "example@example.com"));
         assertStatus(400, () ->
-                serviceActions.registerUser("alice", " ", "a@example.com"));
+                serviceActions.registerUser("Billy", " ", "example@example.com"));
         assertStatus(400, () ->
-                serviceActions.registerUser("alice", "password", null));
+                serviceActions.registerUser("Billy", "password", null));
     }
 
     @Test
     void registerRejectsDuplicateUsername() throws Exception {
-        register("alice");
+        register("Billy");
 
         assertStatus(403, () ->
-                serviceActions.registerUser("alice", "other-password", "other@example.com"));
+                serviceActions.registerUser("Billy", "different-password", "other@example.com"));
     }
 
     @Test
     void loginAcceptsCorrectPasswordAndCreatesToken() throws Exception {
-        register("alice");
+        register("Billy");
 
-        AuthData auth = serviceActions.loginUser("alice", "password");
+        AuthData auth = serviceActions.loginUser("Billy", "password");
 
-        assertEquals("alice", auth.username());
+        assertEquals("Billy", auth.username());
         assertNotNull(auth.authToken());
         assertFalse(auth.authToken().isBlank());
     }
 
     @Test
     void loginRejectsUnknownUserAndWrongPassword() throws Exception {
-        register("alice");
+        register("Billy");
 
         assertStatus(401, () ->
                 serviceActions.loginUser("unknown", "password"));
         assertStatus(401, () ->
-                serviceActions.loginUser("alice", "wrong-password"));
+                serviceActions.loginUser("Billy", "wrong-password"));
     }
 
     @Test
@@ -74,12 +74,12 @@ class ServiceActionsTest {
         assertStatus(400, () ->
                 serviceActions.loginUser(null, "password"));
         assertStatus(400, () ->
-                serviceActions.loginUser("alice", ""));
+                serviceActions.loginUser("Billy", ""));
     }
 
     @Test
     void logoutInvalidatesAuthToken()  throws Exception{
-        AuthData auth = register("alice");
+        AuthData auth = register("Billy");
 
         serviceActions.logoutUser(auth.authToken());
 
@@ -89,7 +89,7 @@ class ServiceActionsTest {
 
     @Test
     void listGamesRequiresAuthAndReturnsCreatedGames() throws Exception {
-        AuthData auth = register("alice");
+        AuthData auth = register("Billy");
 
         assertTrue(serviceActions.listGame(auth.authToken()).isEmpty());
 
@@ -111,7 +111,7 @@ class ServiceActionsTest {
 
     @Test
     void createGameRejectsMissingNameAndInvalidToken() throws Exception {
-        AuthData auth = register("alice");
+        AuthData auth = register("Billy");
 
         assertStatus(400, () ->
                 serviceActions.createGame(auth.authToken(), null));
@@ -123,28 +123,28 @@ class ServiceActionsTest {
 
     @Test
     void joinGameAssignsWhiteAndBlackPlayers() throws Exception {
-        AuthData alice = register("alice");
-        AuthData bob = register("bob");
-        int gameID = serviceActions.createGame(alice.authToken(), "Practice");
+        AuthData billy = register("Billy");
+        AuthData bob = register("Bob");
+        int gameID = serviceActions.createGame(billy.authToken(), "Practice");
 
         serviceActions.joinGame(
-                alice.authToken(), ChessGame.TeamColor.WHITE, gameID);
+                billy.authToken(), ChessGame.TeamColor.WHITE, gameID);
         serviceActions.joinGame(
                 bob.authToken(), ChessGame.TeamColor.BLACK, gameID);
 
-        GameData game = serviceActions.listGame(alice.authToken()).get(0);
-        assertEquals("alice", game.whiteUser());
-        assertEquals("bob", game.blackUser());
+        GameData game = serviceActions.listGame(billy.authToken()).get(0);
+        assertEquals("Billy", game.whiteUser());
+        assertEquals("Bob", game.blackUser());
     }
 
     @Test
     void joinGameRejectsOccupiedColor()  throws Exception{
-        AuthData alice = register("alice");
-        AuthData bob = register("bob");
-        int gameID = serviceActions.createGame(alice.authToken(), "Practice");
+        AuthData billy = register("Billy");
+        AuthData bob = register("Bob");
+        int gameID = serviceActions.createGame(billy.authToken(), "Practice");
 
         serviceActions.joinGame(
-                alice.authToken(), ChessGame.TeamColor.WHITE, gameID);
+                billy.authToken(), ChessGame.TeamColor.WHITE, gameID);
 
         assertStatus(403, () ->
                 serviceActions.joinGame(
@@ -153,18 +153,18 @@ class ServiceActionsTest {
 
     @Test
     void joinGameRejectsInvalidRequestOrToken() throws Exception {
-        AuthData alice = register("alice");
-        int gameID = serviceActions.createGame(alice.authToken(), "Practice");
+        AuthData billy = register("billy");
+        int gameID = serviceActions.createGame(billy.authToken(), "Practice");
 
         assertStatus(400, () ->
                 serviceActions.joinGame(
-                        alice.authToken(), null, gameID));
+                        billy.authToken(), null, gameID));
         assertStatus(400, () ->
                 serviceActions.joinGame(
-                        alice.authToken(), ChessGame.TeamColor.WHITE, null));
+                        billy.authToken(), ChessGame.TeamColor.WHITE, null));
         assertStatus(400, () ->
                 serviceActions.joinGame(
-                        alice.authToken(), ChessGame.TeamColor.WHITE, 9999));
+                        billy.authToken(), ChessGame.TeamColor.WHITE, 9999));
         assertStatus(401, () ->
                 serviceActions.joinGame(
                         "not-a-token", ChessGame.TeamColor.WHITE, gameID));
@@ -172,7 +172,7 @@ class ServiceActionsTest {
 
     @Test
     void resetDBClearsUsersTokensAndGames() throws Exception {
-        AuthData oldAuth = register("alice");
+        AuthData oldAuth = register("Billy");
         serviceActions.createGame(oldAuth.authToken(), "Practice");
 
         serviceActions.resetDB();
@@ -181,7 +181,7 @@ class ServiceActionsTest {
                 serviceActions.listGame(oldAuth.authToken()));
 
         // Registering the same username again confirms the user was cleared.
-        AuthData newAuth = register("alice");
+        AuthData newAuth = register("Billy");
         assertTrue(serviceActions.listGame(newAuth.authToken()).isEmpty());
     }
 

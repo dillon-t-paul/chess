@@ -31,7 +31,7 @@ public class ServiceActions {
         }
         UserData user = users.get(username);
         if (user == null || !user.password().equals(password)) {
-            throw new ServiceException(403, "Errorl: unauthorized");
+            throw new ServiceException(401, "Errorl: unauthorized");
         }
         return createAuth(username);
     }
@@ -99,13 +99,13 @@ public class ServiceActions {
         if (emptyOrNull(authToken)) {
             throw new ServiceException(400, "Error: bad request");
         }
-        if (!authTokens.containsValue(authToken)) {
-            throw new ServiceException(403, "Error: unauthorized");
+        if (!authTokens.containsKey(authToken)) {
+            throw new ServiceException(401, "Error: unauthorized");
         }
     }
 
     private boolean emptyOrNull (String value) {
-        if (value.isEmpty() || value.isBlank() || value == null) {
+        if (value==null || value.isBlank() || value.isEmpty()) {
             return true;
         }
         return false;
