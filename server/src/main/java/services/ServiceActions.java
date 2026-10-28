@@ -19,7 +19,7 @@ public class ServiceActions {
             throw new ServiceException(400, "Error: bad request");
         }
         if (users.containsKey(username)) {
-            throw new ServiceException(403, "username already taken");
+            throw new ServiceException(403, "Error: already taken");
         }
         users.put(username, new UserData(username, password, email));
         return createAuth(username);
@@ -31,7 +31,7 @@ public class ServiceActions {
         }
         UserData user = users.get(username);
         if (user == null || !user.password().equals(password)) {
-            throw new ServiceException(401, "Errorl: unauthorized");
+            throw new ServiceException(401, "Error: unauthorized");
         }
         return createAuth(username);
     }
@@ -64,19 +64,19 @@ public class ServiceActions {
         String username = authTokens.get(authToken);
         GameData game = games.get(gameID);
         if (game==null) {
-            throw new ServiceException(400, "Error: ad Request");
+            throw new ServiceException(400, "Error: bad Request");
         }
 
         if (teamColor == ChessGame.TeamColor.BLACK) {
-            if (game.blackUser() != null) {
-                throw new ServiceException(403, "Error: Team already taken");
+            if (game.blackUsername() != null) {
+                throw new ServiceException(403, "Error: already taken");
             }
-            games.put(game.gameID(), new GameData(game.gameID(), game.whiteUser(), username, game.gameName(), game.game()));
+            games.put(game.gameID(), new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game()));
         } else {
-            if (game.whiteUser() != null) {
-                throw new ServiceException(403, "Error: Team already taken");
+            if (game.whiteUsername() != null) {
+                throw new ServiceException(403, "Error: already taken");
             }
-            games.put(game.gameID(), new GameData(game.gameID(), username, game.blackUser(), game.gameName(), game.game()));
+            games.put(game.gameID(), new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game()));
         }
     }
 

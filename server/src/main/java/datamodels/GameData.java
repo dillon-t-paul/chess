@@ -2,5 +2,5 @@ package datamodels;
 
 import chess.ChessGame;
 
-public record GameData(Integer gameID, String whiteUser, String blackUser, String gameName, ChessGame game) {
+public record GameData(Integer gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
 }
