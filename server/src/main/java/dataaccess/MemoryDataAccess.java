@@ -4,16 +4,13 @@ import datamodels.AuthData;
 import datamodels.GameData;
 import datamodels.UserData;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MemoryDataAccess implements DataAccess{
     private final Map<String, UserData> users = new HashMap<>();
     private final Map<String, AuthData> authTokens = new HashMap<>();
-    private final Map<Integer, GameData> games = new HashMap<>();
+    private final Map<Integer, GameData> games = new LinkedHashMap<>();
     private final AtomicInteger nextGameID = new AtomicInteger(1);
 
     @Override
@@ -42,8 +39,11 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public void createGame(GameData gameData) {
-        games.put(gameData.gameID(), gameData);
+    public int createGame(GameData gameData) {
+        int gameID = nextGameID.getAndIncrement();
+        GameData storedGame = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+        games.put(gameID, storedGame);
+        return gameID;
     }
 
     @Override
@@ -54,11 +54,6 @@ public class MemoryDataAccess implements DataAccess{
     @Override
     public List<GameData> listGames() {
         return new ArrayList<>(games.values());
-    }
-
-    @Override
-    public int nextGameID() {
-        return nextGameID.getAndIncrement();
     }
 
     @Override

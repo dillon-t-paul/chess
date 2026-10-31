@@ -14,10 +14,9 @@ public interface DataAccess {
     void createAuthData(AuthData authData);
     void removeAuthData(String authToken);
 
-    int nextGameID();
     GameData getGameData(int gameID);
     List<GameData> listGames();
-    void createGame(GameData game);
+    int createGame(GameData game);
     void updateGame(GameData game);
 
     void clear();

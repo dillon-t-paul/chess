@@ -60,11 +60,8 @@ public class ServiceActions {
         if (emptyOrNull(gameName)) {
             throw new ServiceException(400, "Error: bad request");
         }
-        // Use global incrementor to set game ID
-        int gameID = dataAccess.nextGameID();
         // Initialize game, then return just the ID for the json response
-        dataAccess.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
-        return gameID;
+        return dataAccess.createGame(new GameData(null, null, null, gameName, new ChessGame()));
     }
 
     public void joinGame(String authToken, ChessGame.TeamColor teamColor, Integer gameID) throws Exception {
