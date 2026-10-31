@@ -1,10 +1,42 @@
 package dataaccess;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import chess.ChessGame;
 import datamodels.*;
 
 public class SQLDataAccess implements DataAccess {
-
+    private static final string[] CREATE_TABLES = {
+            """
+            CREATE TABLE IF NOT EXISTS users (
+            username VARCHAR(100) PRIMARY KEY,
+            hashed_password VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS auth_tokens (
+            auth_token VARCHAR(255) PRIMARY KEY,
+            username VARCHAR(100) NOT NULL,
+            FOREIGN KEY (username) REFERENCES users(username)
+                ON DELETE CASCADE
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS games (
+            game_id INT AUTO_INCREMENT PRIMARY KEY,
+            white_username VARCHAR(100) NULL,
+            black_username VARCHAR(100) NULL,
+            game_name VARCHAR(255) NOT NULL,
+            game_state TEXT NOT NULL,
+            FOREIGN KEY (white_username) REFERENCES users(username)
+                ON DELETE SET NULL
+            FOREIGN KEY (black_username) REFERENCES users(username)
+                ON DELETE SET NULL
+            )
+            """
+    };
 
     @Override
     public void createUser(UserData userData) {
