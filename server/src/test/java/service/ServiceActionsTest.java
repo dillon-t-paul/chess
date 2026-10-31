@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import dataaccess.MemoryDataAccess;
 import datamodels.AuthData;
 import datamodels.GameData;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,7 @@ class ServiceActionsTest {
 
     @BeforeEach
     void setUp() {
-        serviceActions = new ServiceActions();
+        serviceActions = new ServiceActions(new MemoryDataAccess());
     }
 
     @Test

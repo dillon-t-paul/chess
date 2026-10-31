@@ -12,16 +12,21 @@ import datamodels.*;
 import services.ServiceActions;
 import services.ServiceActions.ServiceException;
 
+import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
+
 public class Server {
     private static final Gson GSON = new Gson();
 
     private final Javalin javalin;
     private final ServiceActions serviceActions;
+    private DataAccess dataAccess;
 
     public Server() {
 
+        dataAccess = new MemoryDataAccess();
+        serviceActions = new ServiceActions(dataAccess);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        serviceActions = new ServiceActions();
 
         // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clear);
