@@ -4,15 +4,16 @@ import chess.ChessGame;
 import datamodels.AuthData;
 import datamodels.GameData;
 import datamodels.UserData;
+import dataaccess.memoryAccess;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServiceActions {
-    private final Map<String, UserData> users = new HashMap<>();
-    private final Map<String, String> authTokens = new HashMap<>();
-    private final Map<Integer, GameData> games = new HashMap<>();
-    private final AtomicInteger nextGameID = new AtomicInteger(1);
+    private final memoryAccess memory;
+
+    public ServiceActions(memoryAccess memory) {
+        this.memory = memory;
+    }
 
     public AuthData registerUser(String username, String password, String email) throws Exception {
         // First check to make sure inputs are correct
@@ -20,11 +21,11 @@ public class ServiceActions {
             throw new ServiceException(400, "Error: bad request");
         }
         // Then make sure username is available
-        if (users.containsKey(username)) {
+        if (memory.getUserData(username) != null) {
             throw new ServiceException(403, "Error: already taken");
         }
         // then create a new user object and store it in the memory map.
-        users.put(username, new UserData(username, password, email));
+        memory.registerUser(new UserData(username, password, email));
         return createAuth(username);
     }
 
@@ -33,7 +34,7 @@ public class ServiceActions {
         if (emptyOrNull(username) || emptyOrNull(password)) {
             throw new ServiceException(400, "Error: bad request");
         }
-        UserData user = users.get(username);
+        UserData user = memory.getUserData(username);
         // Pull username, then make sure user exists and credentials match
         if (user == null || !user.password().equals(password)) {
             throw new ServiceException(401, "Error: unauthorized");
@@ -45,13 +46,13 @@ public class ServiceActions {
     public void logoutUser(String authToken) throws Exception {
         checkAuth(authToken);
         // First check auth, then remove their auth token, as it is no longer valid post logout.
-        authTokens.remove(authToken);
+        memory.removeAuthData(authToken);
     }
 
     public List<GameData> listGame(String authToken) throws Exception {
         checkAuth(authToken);
         // First check auth, then return an array list of all the values
-        return new ArrayList<>(games.values());
+        return new ArrayList<>(memory.getGamesList());
     }
 
     public Integer createGame(String authToken, String gameName) throws Exception {
@@ -60,9 +61,9 @@ public class ServiceActions {
             throw new ServiceException(400, "Error: bad request");
         }
         // Use global incrementor to set game ID
-        int gameID = nextGameID.getAndIncrement();
+        int gameID = memory.nextGameID();
         // Initialize game, then return just the ID for the json response
-        games.put(gameID, new GameData(gameID, null, null, gameName, new ChessGame()));
+        memory.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
     }
 
@@ -71,8 +72,8 @@ public class ServiceActions {
         if (teamColor==null || gameID==null) {
             throw new ServiceException(400, "Error: bad request");
         }
-        String username = authTokens.get(authToken);
-        GameData game = games.get(gameID);
+        String username = memory.getAuthData(authToken).username();
+        GameData game = memory.getGameData(gameID);
         if (game==null) {
             throw new ServiceException(400, "Error: bad Request");
         }
@@ -95,16 +96,13 @@ public class ServiceActions {
 
     public void resetDB() throws Exception {
 //        Three calls: Clear UserData, Clear GameData, Clear AuthData
-        users.clear();
-        authTokens.clear();
-        games.clear();
-        // Reset counter for game IDs
-        nextGameID.set(1);
+        memory.resetDB();
     }
 
     private AuthData createAuth(String username) {
         //Generates a random UUID, then converts it to a string to be used as the authToken
         String authToken = UUID.randomUUID().toString();
+        memory.user
         authTokens.put(authToken, username);
         //Stores authToken in memory, then returns an AuthData object with all info
         return new AuthData(username, authToken);

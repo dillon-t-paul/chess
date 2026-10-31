@@ -5,13 +5,17 @@ import datamodels.AuthData;
 import datamodels.GameData;
 import datamodels.UserData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class memoryAccess {
     private final Map<String, UserData> users = new HashMap<>();
     private final Map<String, AuthData> authTokens = new HashMap<>();
     private final Map<Integer, GameData> games = new HashMap<>();
+    private final AtomicInteger nextGameID = new AtomicInteger(1);
 
     public void registerUser(UserData userData) {
         users.put(userData.username(), userData);
@@ -33,16 +37,30 @@ public class memoryAccess {
         authTokens.remove(authToken);
     }
 
-    public int createGame(GameData gameData) {
+    public void createGame(GameData gameData) {
         games.put(gameData.gameID(), gameData);
-        return gameData.gameID();
     }
 
-    public void joinGame(Integer gameID, String whiteUsername, String blackUsername, String gameName) {
-        games.put(gameID, new GameData(gameID, whiteUsername, blackUsername, gameName, null));
+    public GameData getGameData(Integer gameID) {
+        return games.get(gameID);
     }
 
-    public void updateGame(Integer gameID, ChessGame game) {
-        games.compute(gameID, (k, gameState) -> new GameData(gameID, gameState.whiteUsername(), gameState.blackUsername(), gameState.gameName(), game));
+    public List<GameData> getGamesList() {
+        return new ArrayList<>(games.values());
+    }
+
+    public int nextGameID() {
+        return nextGameID.getAndIncrement();
+    }
+
+    public void updateGame(GameData game) {
+        games.put(game.gameID(), game);
+    }
+
+    public void resetDB() {
+        users.clear();
+        authTokens.clear();
+        games.clear();
+        nextGameID.set(1);
     }
 }
