@@ -55,15 +55,56 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
-    public void createUser(UserData userData) {
+    public void registerUser(UserData userData) throws DataAccessException {
         // Register UserData (String username, String password, String email) in database
+        String sql = """
+                INSERT INTO users (username, hashed_password, email)
+                VALUES (?, ?, ?)
+                """;
+
+        try (var connection = DatabaseManager.getConnection();
+             var statement = connection.prepareStatement(sql))
+        {
+            statement.setString(1, userData.username());
+            statement.setString(2, userData.password());
+            statement.setString(3, userData.email());
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to register user", exception);
+        }
     }
 
     @Override
-    public UserData getUserData(String username) {
+    public UserData getUserData(String username) throws DataAccessException {
         // Query the database for UserData using PK (username)
         // return UserData object or null if user doesn't exist
+        String sql = """
+            SELECT username, password_hash, email
+            FROM users
+            WHERE username = ?
+            """;
+
+        try (var connection = DatabaseManager.getConnection();
+             var statement = connection.prepareStatement(sql))
+        {
+            statement.setString(1, username);
+
+            try (var result = statement.executeQuery()) {
+                if (!result.next()) {
+                    return null;
+                }
+
+                return new UserData(
+                        result.getString("username"),
+                        result.getString("password_hash"),
+                        result.getString("email")
+                );
+            }
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to retrieve user", exception);
+        }
     }
 
     @Override

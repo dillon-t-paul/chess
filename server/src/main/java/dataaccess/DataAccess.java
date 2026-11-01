@@ -7,8 +7,8 @@ import datamodels.UserData;
 import java.util.List;
 
 public interface DataAccess {
-    UserData getUserData(String username);
-    void registerUser(UserData user);
+    UserData getUserData(String username) throws DataAccessException;
+    void registerUser(UserData user) throws DataAccessException;
 
     AuthData getAuthData(String authToken);
     void createAuthData(AuthData authData);
