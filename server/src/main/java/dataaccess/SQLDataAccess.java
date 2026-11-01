@@ -1,12 +1,15 @@
 package dataaccess;
 
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.*;
+import com.google.gson.Gson;
 
 import chess.ChessGame;
 import datamodels.*;
 
 public class SQLDataAccess implements DataAccess {
+    private static final Gson GSON = new Gson();
+
     private static final String[] CREATE_TABLES = {
             """
             CREATE TABLE IF NOT EXISTS users (
@@ -37,6 +40,9 @@ public class SQLDataAccess implements DataAccess {
             )
             """
     };
+
+    private static final String GAME_COLUMNS =
+            "game_id, white_username, black_username, game_name, game_state";
 
     public SQLDataAccess() throws DataAccessException {
         DatabaseManager.createDatabase();
@@ -165,28 +171,82 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
-    public GameData listGames() {
-        // Query database for all GameData objects
-        // Return a list of GameData objects or null if db is empty
+    public int createGame(GameData gameData) throws DataAccessException {
+        // Add new GameData object (Integer gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) to db
+        String sql = """
+                INSERT INTO games (white_username, black_username, game_name, game_state)
+                VALUES = (?, ?, ?, ?)
+                """;
+
+        try (var connection = DatabaseManager.getConnection();
+            var statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+        {
+            setNullableString(statement, 1, gameData.whiteUsername());
+            setNullableString(statement, 2, gameData.blackUsername());
+            statement.setString(3, gameData.gameName());
+            statement.setString(4, GSON.toJson(gameData.game()));
+            statement.executeUpdate();
+
+            try (var keys = statement.getGeneratedKeys()) {
+                if (!keys.next()) {
+                    throw new SQLDataException("Database did not return a game ID");
+                }
+                return keys.getInt(1);
+            }
+        } catch (SQLException exception) {
+            throw new DataAccessException("unable to create a game", exception);
+        }
     }
 
     @Override
-    public GameData getGame(Integer gameID) {
+    public GameData getGameData(int gameID) throws DataAccessException {
         // Query database for GameData using the PK of gameID
         // Return GameData object when found, or null if not found
+        String sql = "SELECT" + GAME_COLUMNS + "FROM games WHERE game_id = ?";
+
+        try (var connection = DatabaseManager.getConnection();
+            var statement = connection.prepareStatement(sql))
+        {
+            statement.setInt(1, gameID);
+
+            try (var result = statement.executeQuery()) {
+                if (result.next()) {
+                    return readGame(result);
+                } else {return null;}
+            }
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to retrieve game", exception);
+        }
     }
 
     @Override
-    public int createGame(GameData gameData) {
-        // Add new GameData object (Integer gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) to db
+    public List<GameData> listGames() throws DataAccessException {
+        // Query database for all GameData objects
+        // Return a list of GameData objects or null if db is empty
+        String sql = "SELECT" + GAME_COLUMNS + "FROM games ORDER BY game_id";
+        List<GameData> games = new ArrayList<>();
+
+        try (var connection = DatabaseManager.getConnection();
+            var statement = connection.prepareStatement(sql);
+            var result = statement.executeQuery())
+        {
+            while (result.next()) {
+                games.add(readGame(result));
+            }
+            return games;
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to list games", exception);
+        }
     }
 
     @Override
-    public void joinGame(ChessGame.TeamColor teamColor, Integer gameID) {
+    public void updateGame(GameData game) {
         // Query database for GameData based on gameID PK
         // Check if teamColor is available. Throw error if not.
         // Update GameData with user in the teamColor slot
+
     }
 
     @Override
@@ -198,5 +258,25 @@ public class SQLDataAccess implements DataAccess {
     public void verifyClearedDB() {
         // Query db for UserData, AuthData, and GameData.
         // Verify all queries return null
+    }
+
+    private void setNullableString(java.sql.PreparedStatement statement, int parameter, String value) throws SQLException {
+        if (value == null) {
+            statement.setNull(parameter, Types.VARCHAR);
+        } else {
+            statement.setString(parameter, value);
+        }
+    }
+
+    private GameData readGame(ResultSet result) throws SQLException {
+        ChessGame game = GSON.fromJson(result.getString("game_state"), ChessGame.class);
+
+        return new GameData(
+                result.getInt("game_id"),
+                result.getString("white_username"),
+                result.getString("black_username"),
+                result.getString("game_name"),
+                game
+        );
     }
 }
