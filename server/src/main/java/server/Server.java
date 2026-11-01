@@ -20,7 +20,10 @@ public class Server {
 
     private final Javalin javalin;
     private final ServiceActions serviceActions;
-    private DataAccess dataAccess;
+
+    public Server() {
+        this(new MemoryDataAccess());
+    }
 
     public Server(DataAccess dataAccess) {
 
