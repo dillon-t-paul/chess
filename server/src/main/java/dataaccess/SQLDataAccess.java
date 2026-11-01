@@ -7,7 +7,7 @@ import chess.ChessGame;
 import datamodels.*;
 
 public class SQLDataAccess implements DataAccess {
-    private static final string[] CREATE_TABLES = {
+    private static final String[] CREATE_TABLES = {
             """
             CREATE TABLE IF NOT EXISTS users (
             username VARCHAR(100) PRIMARY KEY,
@@ -37,6 +37,23 @@ public class SQLDataAccess implements DataAccess {
             )
             """
     };
+
+    public SQLDataAccess() throws DataAccessException {
+        DatabaseManager.createDatabase();
+        createTables();
+    }
+
+    private void createTables() throws DataAccessException {
+        try (var connection = DatabaseManager.getConnection();
+             Statement statement = connection.createStatement())
+        {
+            for (String sql : CREATE_TABLES) {
+                statement.executeUpdate(sql);
+            }
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to create database tables", exception);
+        }
+    }
 
     @Override
     public void createUser(UserData userData) {
