@@ -7,8 +7,6 @@ import com.google.gson.Gson;
 import chess.ChessGame;
 import datamodels.*;
 
-import javax.xml.crypto.Data;
-
 public class SQLDataAccess implements DataAccess {
     private static final Gson GSON = new Gson();
 
@@ -36,7 +34,7 @@ public class SQLDataAccess implements DataAccess {
             game_name VARCHAR(255) NOT NULL,
             game_state TEXT NOT NULL,
             FOREIGN KEY (white_username) REFERENCES users(username)
-                ON DELETE SET NULL
+                ON DELETE SET NULL,
             FOREIGN KEY (black_username) REFERENCES users(username)
                 ON DELETE SET NULL
             )
@@ -89,7 +87,7 @@ public class SQLDataAccess implements DataAccess {
         // Query the database for UserData using PK (username)
         // return UserData object or null if user doesn't exist
         String sql = """
-            SELECT username, password_hash, email
+            SELECT username, hashed_password, email
             FROM users
             WHERE username = ?
             """;
@@ -145,6 +143,7 @@ public class SQLDataAccess implements DataAccess {
         try (var connections = DatabaseManager.getConnection();
             var statement = connections.prepareStatement(sql))
         {
+            statement.setString(1, authToken);
             try (var result = statement.executeQuery()) {
                 if (!result.next()) {
                     return null;
@@ -179,7 +178,7 @@ public class SQLDataAccess implements DataAccess {
         // Add new GameData object (Integer gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) to db
         String sql = """
                 INSERT INTO games (white_username, black_username, game_name, game_state)
-                VALUES = (?, ?, ?, ?)
+                VALUES (?, ?, ?, ?)
                 """;
 
         try (var connection = DatabaseManager.getConnection();
@@ -206,7 +205,7 @@ public class SQLDataAccess implements DataAccess {
     public GameData getGameData(int gameID) throws DataAccessException {
         // Query database for GameData using the PK of gameID
         // Return GameData object when found, or null if not found
-        String sql = "SELECT" + GAME_COLUMNS + "FROM games WHERE game_id = ?";
+        String sql = "SELECT " + GAME_COLUMNS + " FROM games WHERE game_id = ?";
 
         try (var connection = DatabaseManager.getConnection();
             var statement = connection.prepareStatement(sql))

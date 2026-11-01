@@ -22,11 +22,10 @@ public class Server {
     private final ServiceActions serviceActions;
     private DataAccess dataAccess;
 
-    public Server() {
+    public Server(DataAccess dataAccess) {
 
-        dataAccess = new MemoryDataAccess();
-        serviceActions = new ServiceActions(dataAccess);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        serviceActions = new ServiceActions(dataAccess);
 
         // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clear);
