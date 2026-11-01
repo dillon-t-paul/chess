@@ -108,20 +108,61 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void createAuth(AuthData authData) {
+    public void createAuthData(AuthData authData) throws DataAccessException {
         // register AuthData (String username, String authToken) in database
+        String sql = """
+                INSERT INTO auth_tokens (auth_token, username)
+                VALUES (?, ?)
+                """;
+
+        try (var connection = DatabaseManager.getConnection();
+            var statement = connection.prepareStatement(sql))
+        {
+            statement.setString(1, authData.authToken());
+            statement.setString(2, authData.username());
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to create auth token", exception);
+        }
     }
 
     @Override
-    public AuthData checkAuth(String authToken) {
+    public AuthData getAuthData(String authToken) throws DataAccessException {
         // Query the database for AuthData using PK authToken
         // Return the AuthData object, or null if it is invalid
+        String sql = """
+                SELECT auth_token, username FROM auth_tokens WHERE auth_token = ?
+                """;
+
+        try (var connections = DatabaseManager.getConnection();
+            var statement = connections.prepareStatement(sql))
+        {
+            try (var result = statement.executeQuery()) {
+                if (!result.next()) {
+                    return null;
+                }
+
+                return new AuthData(result.getString("username"), result.getString("auth_token"));
+            }
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to retrieve auth token", exception);
+        }
     }
 
     @Override
-    public void revokeAuth(String authToken) {
+    public void removeAuthData(String authToken) throws DataAccessException {
         // Query database for AuthData object using authToken.
         // Delete it
+        String sql = "DELETE FROM auth_tokens WHERE auth_token = ?";
+
+        try (var connection = DatabaseManager.getConnection();
+            var statement = connection.prepareStatement(sql))
+        {
+            statement.setString(1, authToken);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to remove auth token", exception);
+        }
     }
 
     @Override
