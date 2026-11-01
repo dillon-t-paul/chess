@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dataaccess.DataAccessException;
+import dataaccess.SQLDataAccess;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,10 +27,13 @@ class ServerTest {
     private String baseUrl;
 
     @BeforeEach
-    void startServer() {
-        server = new Server();
+    void startServer() throws Exception {
+        server = new Server(new SQLDataAccess());
         int port = server.run(0);
         baseUrl = "http://localhost:" + port;
+
+        HttpResponse<String> reset = send("DELETE", "/db", null, null);
+        assertEquals(200, reset.statusCode(), reset.body());
     }
 
     @AfterEach

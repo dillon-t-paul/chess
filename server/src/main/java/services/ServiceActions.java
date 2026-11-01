@@ -101,7 +101,7 @@ public class ServiceActions {
         dataAccess.clear();
     }
 
-    private AuthData createAuth(String username) {
+    private AuthData createAuth(String username) throws Exception {
         //Generates a random UUID, then converts it to a string to be used as the authToken
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(username, authToken);

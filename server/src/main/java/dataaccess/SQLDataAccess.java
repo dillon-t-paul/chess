@@ -104,7 +104,7 @@ public class SQLDataAccess implements DataAccess {
 
                 return new UserData(
                         result.getString("username"),
-                        result.getString("password_hash"),
+                        result.getString("hashed_password"),
                         result.getString("email")
                 );
             }
@@ -226,7 +226,7 @@ public class SQLDataAccess implements DataAccess {
     public List<GameData> listGames() throws DataAccessException {
         // Query database for all GameData objects
         // Return a list of GameData objects or null if db is empty
-        String sql = "SELECT" + GAME_COLUMNS + "FROM games ORDER BY game_id";
+        String sql = "SELECT " + GAME_COLUMNS + " FROM games ORDER BY game_id";
         List<GameData> games = new ArrayList<>();
 
         try (var connection = DatabaseManager.getConnection();

@@ -1,6 +1,8 @@
 package passoff.server;
 
 import chess.ChessGame;
+import dataaccess.DataAccessException;
+import dataaccess.SQLDataAccess;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
 import server.Server;
@@ -24,8 +26,8 @@ public class DatabaseTests {
 
 
     @BeforeAll
-    public static void startServer() {
-        server = new Server();
+    public static void startServer() throws DataAccessException {
+        server = new Server(new SQLDataAccess());
         var port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
 
@@ -46,7 +48,7 @@ public class DatabaseTests {
     @Test
     @DisplayName("Persistence Test")
     @Order(1)
-    public void persistenceTest() {
+    public void persistenceTest() throws DataAccessException {
         int initialRowCount = getDatabaseRows();
 
         TestAuthResult regResult = serverFacade.register(TEST_USER);
