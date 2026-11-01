@@ -272,15 +272,20 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void clearDatabase() {
+    public void clear() throws DataAccessException {
         // Clear all UserData, AuthData, and GameData objects
+        try (var connection = DatabaseManager.getConnection();
+            var statement = connection.createStatement())
+        {
+            statement.executeUpdate("DELETE FROM auth_tokens");
+            statement.executeUpdate("DELETE FROM games");
+            statement.executeUpdate("DELETE FROM users");
+            statement.executeUpdate("ALTER TABLE games AUTO_INCREMENT = 1");
+        } catch (SQLException exception) {
+            throw new DataAccessException("Unable to clear database", exception);
+        }
     }
 
-    @Override
-    public void verifyClearedDB() {
-        // Query db for UserData, AuthData, and GameData.
-        // Verify all queries return null
-    }
 
     private void setNullableString(java.sql.PreparedStatement statement, int parameter, String value) throws SQLException {
         if (value == null) {
