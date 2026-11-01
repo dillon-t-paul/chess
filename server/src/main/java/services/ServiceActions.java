@@ -7,6 +7,7 @@ import datamodels.UserData;
 import dataaccess.DataAccess;
 
 import java.util.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class ServiceActions {
     private final DataAccess dataAccess;
@@ -25,7 +26,8 @@ public class ServiceActions {
             throw new ServiceException(403, "Error: already taken");
         }
         // then create a new user object and store it in the dataAccess map.
-        dataAccess.registerUser(new UserData(username, password, email));
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        dataAccess.registerUser(new UserData(username, hashedPassword, email));
         return createAuth(username);
     }
 
@@ -36,7 +38,7 @@ public class ServiceActions {
         }
         UserData user = dataAccess.getUserData(username);
         // Pull username, then make sure user exists and credentials match
-        if (user == null || !user.password().equals(password)) {
+        if (user == null || !BCrypt.checkpw(password, user.password())) {
             throw new ServiceException(401, "Error: unauthorized");
         }
         // creates authToken for current log in session
