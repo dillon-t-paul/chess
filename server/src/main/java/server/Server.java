@@ -2,20 +2,18 @@ package server;
 
 import com.google.gson.JsonParseException;
 import dataaccess.DataAccessException;
-import dataaccess.SQLDataAccess;
+import dataaccess.sql.SQLDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 
 import java.util.*;
 import com.google.gson.Gson;
 
-import chess.ChessGame;
 import datamodels.*;
 import services.ServiceActions;
 import services.ServiceActions.ServiceException;
 
 import dataaccess.DataAccess;
-import dataaccess.MemoryDataAccess;
 
 public class Server {
     private static final Gson GSON = new Gson();

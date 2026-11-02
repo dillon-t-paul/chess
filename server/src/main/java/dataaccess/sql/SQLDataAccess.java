@@ -1,10 +1,12 @@
-package dataaccess;
+package dataaccess.sql;
 
 import java.sql.*;
 import java.util.*;
 import com.google.gson.Gson;
 
 import chess.ChessGame;
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import datamodels.*;
 
 public class SQLDataAccess implements DataAccess {

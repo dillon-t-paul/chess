@@ -1,6 +1,7 @@
-package dataaccess;
+package dataaccess.sql;
 
 import chess.ChessGame;
+import dataaccess.DataAccessException;
 import datamodels.AuthData;
 import datamodels.GameData;
 import datamodels.UserData;

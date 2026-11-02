@@ -2,7 +2,7 @@ package passoff.server;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
-import dataaccess.SQLDataAccess;
+import dataaccess.sql.SQLDataAccess;
 import org.junit.jupiter.api.*;
 import passoff.model.*;
 import server.Server;
