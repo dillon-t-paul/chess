@@ -1,6 +1,8 @@
 package server;
 
 import com.google.gson.JsonParseException;
+import dataaccess.DataAccessException;
+import dataaccess.SQLDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 
@@ -21,8 +23,8 @@ public class Server {
     private final Javalin javalin;
     private final ServiceActions serviceActions;
 
-    public Server() {
-        this(new MemoryDataAccess());
+    public Server() throws DataAccessException {
+        this(new SQLDataAccess());
     }
 
     public Server(DataAccess dataAccess) {
