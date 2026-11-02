@@ -23,8 +23,16 @@ public class Server {
     private final Javalin javalin;
     private final ServiceActions serviceActions;
 
-    public Server() throws DataAccessException {
-        this(new SQLDataAccess());
+    private static DataAccess createSQLDataAccess() {
+        try {
+            return new SQLDataAccess();
+        } catch (DataAccessException exception) {
+            throw new IllegalStateException("Unable to initialize SQL Data Access", exception);
+        }
+    }
+
+    public Server() {
+        this(createSQLDataAccess());
     }
 
     public Server(DataAccess dataAccess) {
