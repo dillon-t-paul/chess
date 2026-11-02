@@ -135,21 +135,40 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingsPosition = kingPosition(teamColor);
+
         for (int row=1; row<=8; row++){
             for (int col=1; col<=8; col++) {
                 ChessPosition currentPosition = new ChessPosition(row, col);
                 ChessPiece currentPiece = board.getPiece(currentPosition);
 
-                if (currentPiece != null && currentPiece.getTeamColor()!=teamColor) {
-                    Collection<ChessMove> possibleMoves = currentPiece.pieceMoves(board, currentPosition);
-                    for (ChessMove move : possibleMoves) {
-                        if (move.getEndPosition().equals(kingsPosition)){
-                            return true;
-                        }
-                    }
+                if (pieceCanReachPosition(
+                        currentPiece, currentPosition, teamColor, kingsPosition)) {
+                    return true;
                 }
             }
         }
+        return false;
+    }
+
+    private boolean pieceCanReachPosition(
+            ChessPiece piece,
+            ChessPosition piecePosition,
+            TeamColor defendingTeam,
+            ChessPosition targetPosition) {
+
+        if (piece == null || piece.getTeamColor() == defendingTeam) {
+            return false;
+        }
+
+        Collection<ChessMove> possibleMoves =
+                piece.pieceMoves(board, piecePosition);
+
+        for (ChessMove move : possibleMoves) {
+            if (move.getEndPosition().equals(targetPosition)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
