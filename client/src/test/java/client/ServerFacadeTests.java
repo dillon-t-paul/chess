@@ -117,4 +117,27 @@ public class ServerFacadeTests {
         assertEquals(400, exception.getStatusCode());
     }
 
+    @Test
+    void logoutRemovesAuthToken() throws Exception {
+        AuthData auth = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+
+        assertNotNull(dataAccess.getAuthData(auth.authToken()));
+
+        facade.logout(auth.authToken());
+
+        assertNull(dataAccess.getAuthData(auth.authToken()));
+    }
+
+    @Test
+    void logoutRejectsInvalidAuthToken() {
+        ServerFacade.ServerException exception = assertThrows(
+                ServerFacade.ServerException.class,
+                () -> facade.logout("invalid-token")
+        );
+
+        assertEquals(401, exception.getStatusCode());
+    }
+
 }

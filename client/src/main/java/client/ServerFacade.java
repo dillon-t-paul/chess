@@ -36,8 +36,8 @@ public class ServerFacade {
         return gson.fromJson(response, AuthData.class);
     }
 
-    public void logout(String authToken) {
-
+    public void logout(String authToken) throws IOException, InterruptedException {
+        sendRequest("DELETE", "/session", authToken, null);
     }
 
     public List<GameData> listGames(String authToken) {
