@@ -2,13 +2,13 @@ package client;
 
 import chess.ChessGame;
 import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import datamodels.*;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.net.http.*;
 import java.util.List;
 
 public class ServerFacade {
@@ -40,8 +40,13 @@ public class ServerFacade {
         sendRequest("DELETE", "/session", authToken, null);
     }
 
-    public List<GameData> listGames(String authToken) {
-        return null;
+    public List<GameData> listGames(String authToken)
+            throws IOException, InterruptedException{
+        String response = sendRequest("GET", "/game", authToken, null);
+        JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+
+        Type gameListType = new TypeToken<List<GameData>>() {}.getType();
+        return gson.fromJson(json.get("games"), gameListType);
 
     }
 

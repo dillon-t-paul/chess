@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.sql.SQLDataAccess;
 import datamodels.*;
@@ -7,6 +8,8 @@ import datamodels.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import server.Server;
+
+import java.util.List;
 
 
 public class ServerFacadeTests {
@@ -135,6 +138,46 @@ public class ServerFacadeTests {
         ServerFacade.ServerException exception = assertThrows(
                 ServerFacade.ServerException.class,
                 () -> facade.logout("invalid-token")
+        );
+
+        assertEquals(401, exception.getStatusCode());
+    }
+
+    @Test
+    void listGamesReturnsEmptyListWhenThereAreNoGames() throws Exception {
+        AuthData auth = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+
+        List<GameData> games = facade.listGames(auth.authToken());
+
+        assertNotNull(games);
+        assertTrue(games.isEmpty());
+    }
+
+    @Test
+    void listGamesReturnsStoredGames() throws Exception {
+        AuthData auth = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+
+        int gameID = dataAccess.createGame(
+                new GameData(null, null, null, "First game", new ChessGame())
+        );
+
+        List<GameData> games = facade.listGames(auth.authToken());
+
+        assertEquals(1, games.size());
+        assertEquals(gameID, games.get(0).gameID());
+        assertEquals("First game", games.get(0).gameName());
+        assertNotNull(games.get(0).game());
+    }
+
+    @Test
+    void listGamesRejectsInvalidAuthToken() {
+        ServerFacade.ServerException exception = assertThrows(
+                ServerFacade.ServerException.class,
+                () -> facade.listGames("invalid-token")
         );
 
         assertEquals(401, exception.getStatusCode());
