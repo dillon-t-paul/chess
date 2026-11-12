@@ -29,8 +29,11 @@ public class ServerFacade {
         return gson.fromJson(response, AuthData.class);
     }
 
-    public AuthData login(String username, String password) {
-        return null;
+    public AuthData login(String username, String password)
+            throws IOException, InterruptedException {
+        UserData request = new UserData(username, password, null);
+        String response = sendRequest("POST", "/session", null, request);
+        return gson.fromJson(response, AuthData.class);
     }
 
     public void logout(String authToken) {
