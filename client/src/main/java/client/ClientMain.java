@@ -145,15 +145,57 @@ public class ClientMain {
     }
 
     private void createGame (String input) {
+        String gameName = input.substring("create".length()).trim();
 
+        if (gameName.isEmpty()) {
+            System.out.println("Usage: create <NAME>");
+            return;
+        }
+
+        try {
+            serverFacade.createGame(authData.authToken(), gameName);
+            System.out.println("Created game: " + gameName);
+        } catch (Exception exception) {
+            handleRequestFailure(exception);
+        }
     }
 
     private void listGames(String[] arguments) {
+        if (arguments.length != 1) {
+            System.out.println("Usage: list");
+            return;
+        }
 
+        try {
+            List<GameData> games = serverFacade.listGames(authData.authToken());
+            displayGames(games);
+        } catch (Exception exception) {
+            handleRequestFailure(exception);
+        }
     }
 
     private void displayGames(List<GameData> games) {
+        if (games.isEmpty()) {
+            System.out.println("There are no games.");
+            return;
+        }
 
+        for (int i=0; i < games.size(); i++) {
+            GameData game = games.get(i);
+
+            System.out.printf(
+                    "%d. %s (White: %s, Black: %s)%n", i + 1, game.gameName(),
+                    playerName(game.whiteUsername()), playerName(game.blackUsername())
+            );
+        }
+    }
+
+    private String playerName(String username) {
+        if (username == null) {
+            return "open";
+        } else {
+            return username;
+        }
     }
 
 
