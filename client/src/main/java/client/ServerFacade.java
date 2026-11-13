@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.*;
 import java.util.List;
+import java.util.Map;
 
 public class ServerFacade {
     private final String serverURL;
@@ -50,12 +51,17 @@ public class ServerFacade {
 
     }
 
-    public int createGame(String authToken, String gameName) {
-        return 0;
+    public int createGame(String authToken, String gameName)
+            throws IOException, InterruptedException {
+        String response = sendRequest("POST", "/game", authToken, Map.of("gameName", gameName));
+        JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+        return json.get("gameID").getAsInt();
     }
 
-    public void joinGame(String authToken, ChessGame.TeamColor color, int gameID) {
-
+    public void joinGame(String authToken, ChessGame.TeamColor color, int gameID)
+            throws IOException, InterruptedException {
+        JoinData request = new JoinData(color, gameID);
+        sendRequest("PUT", "/game", authToken, request);
     }
 
     private String sendRequest(String method, String path, String authToken, Object requestBody)
@@ -68,23 +74,18 @@ public class ServerFacade {
             requestBuilder.header("authorization", authToken);
         }
 
-        HttpRequest.BodyPublisher body = requestBody == null
-                ? HttpRequest.BodyPublishers.noBody()
-                : HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody));
+        HttpRequest.BodyPublisher body;
+        if (requestBody == null) {
+            body = HttpRequest.BodyPublishers.noBody();
+        } else {
+            body = HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody));
+        }
 
-        HttpRequest request = requestBuilder
-                .method(method, body)
-                .build();
-
-        HttpResponse<String> response = httpClient.send(
-                request, HttpResponse.BodyHandlers.ofString()
-        );
+        HttpRequest request = requestBuilder.method(method, body).build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() >= 400) {
-            throw new ServerException(
-                    response.statusCode(),
-                    getErrorMessage(response.body())
-            );
+            throw new ServerException(response.statusCode(),getErrorMessage(response.body()));
         }
 
         return response.body();
@@ -97,7 +98,7 @@ public class ServerFacade {
                 return json.get("message").getAsString();
             }
         } catch (RuntimeException ignored) {
-            // Use a simple fallback if the server response isn't JSON.
+            // Just a simple fallback if the server response isn't JSON
         }
 
         return "The request could not be completed.";

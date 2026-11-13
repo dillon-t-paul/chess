@@ -183,4 +183,113 @@ public class ServerFacadeTests {
         assertEquals(401, exception.getStatusCode());
     }
 
+    @Test
+    void createGameStoresGameAndReturnsItsID() throws Exception {
+        AuthData auth = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+
+        int gameID = facade.createGame(auth.authToken(), "Test game");
+
+        assertTrue(gameID > 0);
+
+        GameData storedGame = dataAccess.getGameData(gameID);
+        assertNotNull(storedGame);
+        assertEquals("Test game", storedGame.gameName());
+        assertNotNull(storedGame.game());
+    }
+
+    @Test
+    void createGameRejectsInvalidAuthToken() {
+        ServerFacade.ServerException exception = assertThrows(
+                ServerFacade.ServerException.class,
+                () -> facade.createGame("invalid-token", "Test game")
+        );
+
+        assertEquals(401, exception.getStatusCode());
+    }
+
+    @Test
+    void createGameRejectsBlankName() throws Exception {
+        AuthData auth = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+
+        ServerFacade.ServerException exception = assertThrows(
+                ServerFacade.ServerException.class,
+                () -> facade.createGame(auth.authToken(), "")
+        );
+
+        assertEquals(400, exception.getStatusCode());
+    }
+
+    @Test
+    void joinGameAssignsPlayerToRequestedColor() throws Exception {
+        AuthData auth = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+        int gameID = facade.createGame(auth.authToken(), "Test game");
+
+        facade.joinGame(auth.authToken(), ChessGame.TeamColor.WHITE, gameID);
+
+        GameData game = dataAccess.getGameData(gameID);
+        assertNotNull(game);
+        assertEquals("player1", game.whiteUsername());
+        assertNull(game.blackUsername());
+    }
+
+    @Test
+    void joinGameRejectsInvalidAuthToken() {
+        ServerFacade.ServerException exception = assertThrows(
+                ServerFacade.ServerException.class,
+                () -> facade.joinGame(
+                        "invalid-token", ChessGame.TeamColor.WHITE, 1
+                )
+        );
+
+        assertEquals(401, exception.getStatusCode());
+    }
+
+    @Test
+    void joinGameRejectsUnknownGameID() throws Exception {
+        AuthData auth = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+
+        ServerFacade.ServerException exception = assertThrows(
+                ServerFacade.ServerException.class,
+                () -> facade.joinGame(
+                        auth.authToken(), ChessGame.TeamColor.WHITE, 99999
+                )
+        );
+
+        assertEquals(400, exception.getStatusCode());
+    }
+
+    @Test
+    void joinGameRejectsOccupiedColor() throws Exception {
+        AuthData firstPlayer = facade.register(
+                "player1", "password", "p1@example.com"
+        );
+        AuthData secondPlayer = facade.register(
+                "player2", "password", "p2@example.com"
+        );
+        int gameID = facade.createGame(firstPlayer.authToken(), "Test game");
+
+        facade.joinGame(
+                firstPlayer.authToken(), ChessGame.TeamColor.WHITE, gameID
+        );
+
+        ServerFacade.ServerException exception = assertThrows(
+                ServerFacade.ServerException.class,
+                () -> facade.joinGame(
+                        secondPlayer.authToken(),
+                        ChessGame.TeamColor.WHITE,
+                        gameID
+                )
+        );
+
+        assertEquals(403, exception.getStatusCode());
+    }
+
 }
