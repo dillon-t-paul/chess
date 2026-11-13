@@ -2,6 +2,7 @@ package client;
 
 import chess.*;
 import datamodels.*;
+import ui.BoardPrinter;
 
 import java.io.IOException;
 import java.util.List;
@@ -227,6 +228,7 @@ public class ClientMain {
             color = ChessGame.TeamColor.valueOf(arguments[2].toUpperCase(Locale.ROOT));
             serverFacade.joinGame(authData.authToken(), color, selectedGame.gameID());
             System.out.println("Joined " + selectedGame.gameName() + " as " + color + ".");
+            BoardPrinter.drawBoard(selectedGame.game(), color);
         } catch (IllegalArgumentException exception) {
             System.out.println("Choose WHITE or BLACK");
         } catch (Exception exception) {
@@ -245,6 +247,7 @@ public class ClientMain {
             return;
         }
         System.out.println("Observing " + selectedGame.gameName() + ".");
+        BoardPrinter.drawBoard(selectedGame.game(), ChessGame.TeamColor.WHITE);
     }
 
     private String playerName(String username) {
