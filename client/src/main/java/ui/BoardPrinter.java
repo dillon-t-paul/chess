@@ -3,6 +3,7 @@ package ui;
 import chess.*;
 
 public class BoardPrinter {
+    private static final String EMPTY_CELL = EscapeSequences.EMPTY + " ";
     public static void drawBoard(ChessGame game, ChessGame.TeamColor perspective) {
         if (game == null || game.getBoard()==null) {
             System.out.println("This game has no board to display");
@@ -20,7 +21,7 @@ public class BoardPrinter {
             } else {
                 row = rowIndex + 1;
             }
-            output.append(" ").append(row).append(" ");
+            output.append("  ").append(row).append(" ");
 
             for (int columnIndex = 0; columnIndex <8; columnIndex++) {
                 int column;
@@ -44,14 +45,14 @@ public class BoardPrinter {
                 output.append(pieceSymbol(piece));
                 output.append(EscapeSequences.RESET_BG_COLOR);
             }
-            output.append(" ").append(row).append(System.lineSeparator());
+            output.append("  ").append(row).append(System.lineSeparator());
         }
         appendFileLabels(output, perspective);
-        System.out.println(output);
+        System.out.print(output);
     }
 
     private static void appendFileLabels(StringBuilder output, ChessGame.TeamColor perspective) {
-        output.append("   ");
+        output.append("    ");
         for (int columnIndex = 0; columnIndex<8; columnIndex++) {
             int column;
 
@@ -62,14 +63,14 @@ public class BoardPrinter {
             }
 
             char file = (char) ('a' + column - 1);
-            output.append(" ").append(file).append(" ");
+            output.append("  ").append(file).append("  ");
         }
         output.append(System.lineSeparator());
     }
 
     private static String pieceSymbol(ChessPiece piece) {
         if (piece == null) {
-            return EscapeSequences.EMPTY;
+            return EMPTY_CELL;
         }
 
         String color;
