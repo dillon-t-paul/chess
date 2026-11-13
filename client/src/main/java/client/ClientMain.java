@@ -17,6 +17,11 @@ public class ClientMain {
     private boolean clientRunning = true;
     private List<GameData> currentGames = List.of();
 
+    private enum ClientState {LOGGED_OUT, LOGGED_IN, IN_GAME, OBSERVING};
+    private ClientState state = ClientState.LOGGED_OUT;
+    private GameData activeGame;
+    private ChessGame.TeamColor playerColor;
+
     private ClientMain(ServerFacade serverFacade, Scanner scanner) {
         this.serverFacade = serverFacade;
         this.scanner = scanner;
@@ -31,7 +36,7 @@ public class ClientMain {
 
     private void run() {
         while (clientRunning) {
-            if (authData == null) {
+            if (state == ClientState.LOGGED_OUT) {
                 runPrelogin();
             } else {
                 runPostLogin();
@@ -43,7 +48,7 @@ public class ClientMain {
         System.out.println("Welcome to 240 Chess.");
 
         while (clientRunning && authData == null) {
-            System.out.print("[LOGGED_OUT] >>> ");
+            printPrompt();
 
             if (!scanner.hasNextLine()) {
                 clientRunning = false;
@@ -64,7 +69,7 @@ public class ClientMain {
                 case "login" -> login(arguments);
                 case "quit" -> clientRunning = false;
                 default -> System.out.println(
-                        "Unknown command. Type help to see the available commands."
+                        "Unknown/Invalid command. Type help to see the available commands."
                 );
             }
         }
@@ -75,7 +80,7 @@ public class ClientMain {
     }
 
     private void runPostLogin() {
-        System.out.print("[LOGGED_IN] >>> ");
+        printPrompt();
 
         if (!scanner.hasNextLine()) {
             clientRunning = false;
@@ -99,7 +104,7 @@ public class ClientMain {
             case "observe" -> observeGame(arguments);
             case "quit" -> clientRunning = false;
             default -> System.out.println(
-                    "Unknown command. Type help to see the available commands."
+                    "Unknown/Invalid command. Type help to see the available commands."
             );
         }
     }
@@ -112,6 +117,7 @@ public class ClientMain {
 
         try {
             authData = serverFacade.register(arguments[1], arguments[2], arguments[3]);
+            state = ClientState.LOGGED_IN;
         } catch (Exception exception) {
             handleRequestFailure(exception);
         }
@@ -125,6 +131,7 @@ public class ClientMain {
 
         try {
             authData = serverFacade.login(arguments[1], arguments[2]);
+            state = ClientState.LOGGED_IN;
         } catch (Exception exception) {
             handleRequestFailure(exception);
         }
@@ -139,6 +146,7 @@ public class ClientMain {
         try {
             serverFacade.logout(authData.authToken());
             authData = null;
+            state = ClientState.LOGGED_OUT;
             System.out.println("Logged out.");
         } catch (Exception exception) {
             handleRequestFailure(exception);
@@ -227,6 +235,7 @@ public class ClientMain {
         try {
             color = ChessGame.TeamColor.valueOf(arguments[2].toUpperCase(Locale.ROOT));
             serverFacade.joinGame(authData.authToken(), color, selectedGame.gameID());
+            state = ClientState.IN_GAME;
             System.out.println("Joined " + selectedGame.gameName() + " as " + color + ".");
             BoardPrinter.drawBoard(selectedGame.game(), color);
         } catch (IllegalArgumentException exception) {
@@ -246,6 +255,7 @@ public class ClientMain {
         if (selectedGame == null) {
             return;
         }
+        state = ClientState.OBSERVING;
         System.out.println("Observing " + selectedGame.gameName() + ".");
         BoardPrinter.drawBoard(selectedGame.game(), ChessGame.TeamColor.WHITE);
     }
@@ -290,5 +300,9 @@ public class ClientMain {
         } else {
             System.out.println("The request could not be completed.");
         }
+    }
+
+    private void printPrompt() {
+        System.out.print("[" + state + "] >>> ");
     }
 }

@@ -2,8 +2,9 @@ package ui;
 
 import chess.*;
 
+import java.util.EmptyStackException;
+
 public class BoardPrinter {
-    private static final String EMPTY_CELL = EscapeSequences.EMPTY + " ";
     public static void drawBoard(ChessGame game, ChessGame.TeamColor perspective) {
         if (game == null || game.getBoard()==null) {
             System.out.println("This game has no board to display");
@@ -52,25 +53,19 @@ public class BoardPrinter {
     }
 
     private static void appendFileLabels(StringBuilder output, ChessGame.TeamColor perspective) {
-        output.append("    ");
-        for (int columnIndex = 0; columnIndex<8; columnIndex++) {
-            int column;
+        String labels;
 
-            if (perspective == ChessGame.TeamColor.WHITE) {
-                column = columnIndex + 1;
-            } else {
-                column = 8 - columnIndex;
-            }
-
-            char file = (char) ('a' + column - 1);
-            output.append("  ").append(file).append("  ");
+        if (perspective == ChessGame.TeamColor.WHITE) {
+            labels = "     a   b   c  d   e  f   g   h    ";
+        } else {
+            labels = "     h   g   f  e   d  c   b   a    ";
         }
-        output.append(System.lineSeparator());
+        output.append(labels).append(System.lineSeparator());
     }
 
     private static String pieceSymbol(ChessPiece piece) {
         if (piece == null) {
-            return EMPTY_CELL;
+            return EscapeSequences.EMPTY;
         }
 
         String color;
@@ -80,60 +75,15 @@ public class BoardPrinter {
             color = EscapeSequences.SET_TEXT_COLOR_BLUE;
         }
 
-        String symbol;
-        switch (piece.getPieceType()) {
-            case KING:
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    symbol = EscapeSequences.WHITE_KING;
-                } else {
-                    symbol = EscapeSequences.BLACK_KING;
-                }
-                break;
-
-            case QUEEN:
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    symbol = EscapeSequences.WHITE_QUEEN;
-                } else {
-                    symbol = EscapeSequences.BLACK_QUEEN;
-                }
-                break;
-
-            case BISHOP:
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    symbol = EscapeSequences.WHITE_BISHOP;
-                } else {
-                    symbol = EscapeSequences.BLACK_BISHOP;
-                }
-                break;
-
-            case KNIGHT:
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    symbol = EscapeSequences.WHITE_KNIGHT;
-                } else {
-                    symbol = EscapeSequences.BLACK_KNIGHT;
-                }
-                break;
-
-            case ROOK:
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    symbol = EscapeSequences.WHITE_ROOK;
-                } else {
-                    symbol = EscapeSequences.BLACK_ROOK;
-                }
-                break;
-
-            case PAWN:
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    symbol = EscapeSequences.WHITE_PAWN;
-                } else {
-                    symbol = EscapeSequences.BLACK_PAWN;
-                }
-                break;
-
-            default:
-                symbol = EscapeSequences.EMPTY;
-                break;
-        }
+        String symbol = switch (piece.getPieceType()) {
+            case KING -> EscapeSequences.WHITE_KING;
+            case QUEEN -> EscapeSequences.WHITE_QUEEN;
+            case BISHOP -> EscapeSequences.WHITE_BISHOP;
+            case KNIGHT -> EscapeSequences.WHITE_KNIGHT;
+            case ROOK -> EscapeSequences.WHITE_ROOK;
+            case PAWN -> EscapeSequences.WHITE_PAWN;
+            default -> EscapeSequences.EMPTY;
+        };
 
         return color + symbol + EscapeSequences.RESET_TEXT_COLOR;
     }
