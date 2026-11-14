@@ -9,6 +9,7 @@ import dataaccess.sql.SQLDataAccess;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import datamodels.*;
 import server.Server;
 
 import java.net.URI;
