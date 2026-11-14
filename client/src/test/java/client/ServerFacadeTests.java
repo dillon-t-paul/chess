@@ -3,7 +3,6 @@ package client;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.sql.SQLDataAccess;
-import datamodels.*;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;

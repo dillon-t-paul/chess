@@ -3,13 +3,13 @@ package server;
 import com.google.gson.JsonParseException;
 import dataaccess.DataAccessException;
 import dataaccess.sql.SQLDataAccess;
+import datamodels.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 
 import java.util.*;
 import com.google.gson.Gson;
 
-import datamodels.*;
 import services.ServiceActions;
 import services.ServiceActions.ServiceException;
 

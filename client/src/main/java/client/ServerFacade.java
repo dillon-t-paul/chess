@@ -1,9 +1,9 @@
 package client;
 
 import chess.ChessGame;
+import datamodels.*;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import datamodels.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
