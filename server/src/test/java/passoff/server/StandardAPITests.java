@@ -473,7 +473,6 @@ public class StandardAPITests {
         //make sure returned good
         assertHttpOk(result);
     }
-
     // ### HELPER ASSERTIONS ###
 
     private void assertHttpOk(TestResult result) {
