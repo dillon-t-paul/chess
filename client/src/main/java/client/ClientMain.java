@@ -2,6 +2,7 @@ package client;
 
 import chess.*;
 import datamodels.*;
+import services.ServiceActions;
 import ui.BoardPrinter;
 
 import java.io.IOException;
@@ -159,6 +160,13 @@ public class ClientMain {
         if (gameName.isEmpty()) {
             System.out.println("Usage: create <NAME>");
             return;
+        }
+
+        for (GameData existingGame : currentGames) {
+            if (existingGame.gameName().equalsIgnoreCase(gameName)) {
+                System.out.println("Game name already in use");
+                return;
+            }
         }
 
         try {

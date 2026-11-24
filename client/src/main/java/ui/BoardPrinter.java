@@ -56,9 +56,9 @@ public class BoardPrinter {
         String labels;
 
         if (perspective == ChessGame.TeamColor.WHITE) {
-            labels = "     a   b   c  d   e  f   g   h    ";
+            labels = "     a  b  c  d  e  f  g  h";
         } else {
-            labels = "     h   g   f  e   d  c   b   a    ";
+            labels = "     h  g  f  e  d  c  b  a";
         }
         output.append(labels).append(System.lineSeparator());
     }
@@ -76,12 +76,12 @@ public class BoardPrinter {
         }
 
         String symbol = switch (piece.getPieceType()) {
-            case KING -> EscapeSequences.WHITE_KING;
-            case QUEEN -> EscapeSequences.WHITE_QUEEN;
-            case BISHOP -> EscapeSequences.WHITE_BISHOP;
-            case KNIGHT -> EscapeSequences.WHITE_KNIGHT;
-            case ROOK -> EscapeSequences.WHITE_ROOK;
-            case PAWN -> EscapeSequences.WHITE_PAWN;
+            case KING -> EscapeSequences.BLACK_KING;
+            case QUEEN -> EscapeSequences.BLACK_QUEEN;
+            case BISHOP -> EscapeSequences.BLACK_BISHOP;
+            case KNIGHT -> EscapeSequences.BLACK_KNIGHT;
+            case ROOK -> EscapeSequences.BLACK_ROOK;
+            case PAWN -> EscapeSequences.BLACK_PAWN;
             default -> EscapeSequences.EMPTY;
         };
 
