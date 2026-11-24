@@ -4,20 +4,21 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import io.javalin.websocket.WsContext;
+import io.javalin.websocket.WsMessageContext;
 import java.util.*;
 import java.util.concurrent.*;
 
 import org.eclipse.jetty.io.ClientConnectionFactory;
 import services.GamePlayService;
+import services.ServiceException;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 public class ChessWebsocketHandler {
     private static final Gson Gson = new Gson();
-    private static final String CONNECTION_ID = "chessConnectionID";
 
     private final GamePlayService gamePlayService;
-    private final ConcurrentMap<String, ClientConnection> connectById = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ClientConnection> connectionsById = new ConcurrentHashMap<>();
     private final ConcurrentMap<Integer, Set<String>> connectionsByGame = new ConcurrentHashMap<>();
 
     public ChessWebsocketHandler(GamePlayService gamePlayService) {
@@ -25,10 +26,10 @@ public class ChessWebsocketHandler {
     }
 
     public void onConnect(WsContext context) {
-        context.sessionAttribute(CONNECTION_ID, UUID.randomUUID().toString());
+
     }
 
-    public void onMessage(WsContext context) {
+    public void onMessage(WsMessageContext context) {
         String connectionId = getConnectionId(context);
         UserGameCommand command;
 
@@ -53,7 +54,22 @@ public class ChessWebsocketHandler {
     }
 
     public void onClose(WsContext context) {
+        String connectionId = getConnectionId(context);
+        if (connectionId == null) {
+            return;
+        }
+        ClientConnection connection = connectionsById.remove(connectionId);
+        if (connection == null) {
+            return;
+        }
 
+        Set<String> gameConnections = connectionsByGame.get(connection.gameID());
+        if (gameConnections != null) {
+            gameConnections.remove(connectionId);
+            if (gameConnections.isEmpty()) {
+                connectionsByGame.remove(connection.gameID(), gameConnections);
+            }
+        }
     }
 
     private void connect(WsContext context, String connectionId, UserGameCommand command) {
@@ -74,7 +90,37 @@ public class ChessWebsocketHandler {
 
             connectionsById.put(connectionId, connection);
             connectionsByGame.computeIfAbsent(command.getGameID(), ignored -> ConcurrentHashMap.newKeySet()).add(connectionId);
+
+            send(context, ServerMessage.loadGame(gameContext.game().game()));
+            String notification;
+            if (playerColor == null) {
+                notification = gameContext.username() + " joined as an observer.";
+            } else {
+                notification = gameContext.username() + " joined as " + playerColor + ".";
+            }
+
+             broadcast(command.getGameID(), connectionId, ServerMessage.notification(notification));
+        } catch (ServiceException exception) {
+            sendError(context, exception.getMessage());
+        } catch (Exception exception) {
+            sendError(context, "Error: connection could not be completed");
         }
+    }
+
+    private ChessGame.TeamColor getPlayerColor(
+            GamePlayService.GameContext gameContext
+    ) {
+        if (gameContext.username().equals(
+                gameContext.game().whiteUsername())) {
+            return ChessGame.TeamColor.WHITE;
+        }
+
+        if (gameContext.username().equals(
+                gameContext.game().blackUsername())) {
+            return ChessGame.TeamColor.BLACK;
+        }
+
+        return null;
     }
 
     private void broadcast(Integer gameID, String excludedConnectionId, ServerMessage message) {
@@ -88,7 +134,7 @@ public class ChessWebsocketHandler {
                 continue;
             }
 
-            ClientConnection connection = connectionIds.get(id);
+            ClientConnection connection = connectionsById.get(id);
             if (connection != null) {
                 send(connection.context(), message);
             }
@@ -96,11 +142,7 @@ public class ChessWebsocketHandler {
     }
 
     private String getConnectionId(WsContext context) {
-        Object value = context.sessionAttribute(CONNECTION_ID);
-        if (value instanceof String) {
-            return (String) value;
-        }
-        return null;
+        return context.sessionId();
     }
 
     private void sendError(WsContext context, String message) {
