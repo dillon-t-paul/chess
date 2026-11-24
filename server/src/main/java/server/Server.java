@@ -22,6 +22,7 @@ public class Server {
     private final Javalin javalin;
     private final ServiceActions serviceActions;
     private final GamePlayService gamePlayService;
+    private final ChessWebsocketHandler chessWebsocketHandler;
 
     private static DataAccess createSQLDataAccess() {
         try {
@@ -40,6 +41,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         serviceActions = new ServiceActions(dataAccess);
         gamePlayService = new GamePlayService(dataAccess);
+        chessWebsocketHandler = new ChessWebsocketHandler(gamePlayService);
 
         // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clear);
@@ -49,6 +51,12 @@ public class Server {
         javalin.get("/game", this::listGames);
         javalin.post("/game", this::createGame);
         javalin.put("/game", this::joinGame);
+
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(chessWebsocketHandler::onConnect);
+            ws.onMessage(chessWebsocketHandler::onMessage);
+            ws.onClose(chessWebsocketHandler::onClose);
+        });
     }
 
     private void clear(Context context) {
