@@ -13,6 +13,7 @@ import java.util.Objects;
 public class ChessGame {
     private ChessBoard board;
     private TeamColor playerTurn;
+    private boolean gameOver;
 
     public ChessGame() {
         // Create board for new game, initialize it with reset
@@ -35,6 +36,14 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         this.playerTurn = team;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 
     /**
@@ -83,6 +92,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (gameOver) {
+            throw new InvalidMoveException();
+        }
+
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition targetPosition = move.getEndPosition();
         if (board == null || startPosition == null || targetPosition == null) {
@@ -246,6 +259,7 @@ public class ChessGame {
         return "ChessGame{" +
                 "board=" + board +
                 ", playerTurn=" + playerTurn +
+                ", gameOver" + gameOver +
                 '}';
     }
 
@@ -255,11 +269,11 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(board, chessGame.board) && playerTurn == chessGame.playerTurn;
+        return Objects.equals(board, chessGame.board) && playerTurn == chessGame.playerTurn && gameOver == chessGame.gameOver;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(board, playerTurn);
+        return Objects.hash(board, playerTurn, gameOver);
     }
 }
