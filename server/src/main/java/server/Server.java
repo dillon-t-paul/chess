@@ -10,8 +10,9 @@ import io.javalin.http.Context;
 import java.util.*;
 import com.google.gson.Gson;
 
+import services.GamePlayService;
 import services.ServiceActions;
-import services.ServiceActions.ServiceException;
+import services.ServiceException;
 
 import dataaccess.DataAccess;
 
@@ -20,6 +21,7 @@ public class Server {
 
     private final Javalin javalin;
     private final ServiceActions serviceActions;
+    private final GamePlayService gamePlayService;
 
     private static DataAccess createSQLDataAccess() {
         try {
@@ -37,6 +39,7 @@ public class Server {
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         serviceActions = new ServiceActions(dataAccess);
+        gamePlayService = new GamePlayService(dataAccess);
 
         // Register your endpoints and exception handlers here.
         javalin.delete("/db", this::clear);
@@ -107,7 +110,7 @@ public class Server {
     private void listGames(Context context) {
         try {
             String authToken = context.header("authorization");
-            List<GameData> gameList = serviceActions.listGame(authToken);
+            List<GameData> gameList = gamePlayService.listGame(authToken);
 
             var returnData = String.format("{ \"games\": %s }", GSON.toJson(gameList));
             sendJson(context, 200, returnData);
@@ -124,7 +127,7 @@ public class Server {
             var authToken = context.header("authorization");
             String reqJson = context.body();
             var data = GSON.fromJson(reqJson, GameData.class);
-            int gameID = serviceActions.createGame(authToken, data.gameName());
+            int gameID = gamePlayService.createGame(authToken, data.gameName());
             var gameData = String.format("{\"gameID\": %d }", gameID);
             sendJson(context, 200, gameData);
 
@@ -142,7 +145,7 @@ public class Server {
             var authToken = context.header("authorization");
             String reqJson = context.body();
             var data = GSON.fromJson(reqJson, JoinData.class);
-            serviceActions.joinGame(authToken, data.playerColor(), data.gameID());
+            gamePlayService.joinGame(authToken, data.playerColor(), data.gameID());
             sendJson(context, 200, "{}");
 
         } catch (ServiceException exception) {

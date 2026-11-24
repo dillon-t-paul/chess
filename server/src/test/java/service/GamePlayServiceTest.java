@@ -8,14 +8,16 @@ import datamodels.AuthData;
 import datamodels.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import services.GamePlayService;
 import services.ServiceActions;
-import services.ServiceActions.ServiceException;
+import services.ServiceException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameplayServiceTest {
     private MemoryDataAccess dataAccess;
-    private ServiceActions service;
+    private ServiceActions authService;
+    private GamePlayService service;
     private AuthData white;
     private AuthData black;
     private AuthData observer;
@@ -24,7 +26,8 @@ class GameplayServiceTest {
     @BeforeEach
     void setUp() throws Exception {
         dataAccess = new MemoryDataAccess();
-        service = new ServiceActions(dataAccess);
+        authService = new ServiceActions(dataAccess);
+        service = new GamePlayService(dataAccess);
         white = register("white");
         black = register("black");
         observer = register("observer");
@@ -35,7 +38,7 @@ class GameplayServiceTest {
 
     @Test
     void gameContextIdentifiesTheAuthenticatedUserAndGame() throws Exception {
-        ServiceActions.GameContext context =
+        GamePlayService.GameContext context =
                 service.getGameContext(white.authToken(), gameID);
 
         assertEquals("white", context.username());
@@ -46,7 +49,7 @@ class GameplayServiceTest {
     void makeMoveUpdatesTheStoredGameAndAdvancesTheTurn() throws Exception {
         ChessMove move = move(2, 5, 4, 5);
 
-        ServiceActions.MoveResult result =
+        GamePlayService.MoveResult result =
                 service.makeMove(white.authToken(), gameID, move);
 
         assertEquals(ChessGame.TeamColor.BLACK, result.game().game().getTeamTurn());
@@ -113,7 +116,7 @@ class GameplayServiceTest {
     }
 
     private AuthData register(String username) throws Exception {
-        return service.registerUser(
+        return authService.registerUser(
                 username,
                 "password",
                 username + "@example.com"
